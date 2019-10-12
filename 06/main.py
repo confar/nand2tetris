@@ -1,5 +1,6 @@
 import argparse
 import os
+from builtins import FileNotFoundError
 
 from parser import AssemblyParser
 

@@ -19,16 +19,5 @@ CHIP Mux4Way16 {
     Mux16(a=a, b=b, sel=sel[0], out=mux0);
     Mux16(a=c, b=d, sel=sel[0], out=mux1);
     Mux16(a=mux0, b=mux1, sel=sel[1], out=out);
-	
+
 }
-/**
-*  Mux16(a=bOrD, b=aOrc, sel=sel[1], out=muxed);
-*   Mux16(a=bOrD, b=b, sel=notSel1, out=muxeb);	
-*
-*   Mux16(a=aOrc, b=a, sel=sel[1], out=muxea);
-*   Mux16(a=aOrc, b=c, sel=notSel1, out=muxec);
-*    
-*    Or16(a=muxed, b=muxeb, out=bord);
-*    Or16(a=bord, b=muxea, out=bordora);
-*    Or16(a=bordora, b=muxec, out=out);
-*/
