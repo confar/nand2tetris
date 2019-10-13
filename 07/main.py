@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from .parser import VMParser
+from parser import VMParser
 
 
 if __name__ == '__main__':
@@ -16,6 +16,9 @@ if __name__ == '__main__':
     with open(infile) as to_read,  open(args.outfile, 'w') as to_write:
         for line in to_read:
             hack_code = VMParser.parse(line)
-            to_write.write(f'{hack_code}\n')
+            if hack_code:
+                # write comment first
+                to_write.write(f'// {line}')
+                to_write.write(f'{hack_code}\n')
 
 
