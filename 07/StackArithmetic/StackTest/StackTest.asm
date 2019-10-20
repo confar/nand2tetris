@@ -32,17 +32,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere1
+@JumpHere9
 D;JEQ
 
 @SP
 A=M
 M=0
+@JumpOut9
+0;JMP 
 
-(JumpHere1)
+(JumpHere9)
 @SP
 A=M
 M=-1
+
+(JumpOut9)
+@SP
+M=M+1
 
 // push constant 17
 
@@ -78,17 +84,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere1
+@JumpHere12
 D;JEQ
 
 @SP
 A=M
 M=0
+@JumpOut12
+0;JMP 
 
-(JumpHere1)
+(JumpHere12)
 @SP
 A=M
 M=-1
+
+(JumpOut12)
+@SP
+M=M+1
 
 // push constant 16
 
@@ -124,17 +136,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere1
+@JumpHere15
 D;JEQ
 
 @SP
 A=M
 M=0
+@JumpOut15
+0;JMP 
 
-(JumpHere1)
+(JumpHere15)
 @SP
 A=M
 M=-1
+
+(JumpOut15)
+@SP
+M=M+1
 
 // push constant 892
 
@@ -170,18 +188,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere3
-A=M
+@JumpHere18
 D;JGT
 
 @SP
 A=M
 M=0
+@JumpOut18
+0;JMP 
 
-(JumpHere3)
+(JumpHere18)
 @SP
 A=M
 M=-1
+
+(JumpOut18)
+@SP
+M=M+1
 
 // push constant 891
 
@@ -217,18 +240,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere3
-A=M
+@JumpHere21
 D;JGT
 
 @SP
 A=M
 M=0
+@JumpOut21
+0;JMP 
 
-(JumpHere3)
+(JumpHere21)
 @SP
 A=M
 M=-1
+
+(JumpOut21)
+@SP
+M=M+1
 
 // push constant 891
 
@@ -264,18 +292,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere3
-A=M
+@JumpHere24
 D;JGT
 
 @SP
 A=M
 M=0
+@JumpOut24
+0;JMP 
 
-(JumpHere3)
+(JumpHere24)
 @SP
 A=M
 M=-1
+
+(JumpOut24)
+@SP
+M=M+1
 
 // push constant 32767
 
@@ -311,17 +344,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere2
+@JumpHere27
 D;JLT
 
 @SP
 A=M
 M=0
+@JumpOut27
+0;JMP 
 
-(JumpHere2)
+(JumpHere27)
 @SP
 A=M
 M=-1
+
+(JumpOut27)
+@SP
+M=M+1
 
 // push constant 32766
 
@@ -357,17 +396,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere2
+@JumpHere30
 D;JLT
 
 @SP
 A=M
 M=0
+@JumpOut30
+0;JMP 
 
-(JumpHere2)
+(JumpHere30)
 @SP
 A=M
 M=-1
+
+(JumpOut30)
+@SP
+M=M+1
 
 // push constant 32766
 
@@ -403,17 +448,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere2
+@JumpHere33
 D;JLT
 
 @SP
 A=M
 M=0
+@JumpOut33
+0;JMP 
 
-(JumpHere2)
+(JumpHere33)
 @SP
 A=M
 M=-1
+
+(JumpOut33)
+@SP
+M=M+1
 
 // push constant 57
 
@@ -486,6 +537,7 @@ M=M-D
 // neg
 
 @SP
+A=M-1
 M=-M
 
 // and
@@ -523,5 +575,6 @@ M=M|D
 // not
 
 @SP
+A=M-1
 M=!M
 

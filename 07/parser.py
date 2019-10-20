@@ -130,7 +130,7 @@ D=M
 M=D
 '''
 
-EQ_TEMPLATE = '''
+EQ_LT_GT_TEMPLATE = '''
 @SP
 AM=M-1
 D=M
@@ -139,62 +139,23 @@ D=M
 AM=M-1
 D=D-M
 
-@JumpHere1
-D;JEQ
+@JumpHere{{counter}}
+D;{command}
 
 @SP
 A=M
 M=0
+@JumpOut{{counter}}
+0;JMP 
 
-(JumpHere1)
+(JumpHere{{counter}})
 @SP
 A=M
 M=-1
-'''
 
-GT_TEMPLATE = '''
+(JumpOut{{counter}})
 @SP
-AM=M-1
-D=M
-
-@SP
-AM=M-1
-D=D-M
-
-@JumpHere2
-D;JLT
-
-@SP
-A=M
-M=0
-
-(JumpHere2)
-@SP
-A=M
-M=-1
-'''
-
-LT_TEMPLATE = '''
-@SP
-AM=M-1
-D=M
-
-@SP
-AM=M-1
-D=D-M
-
-@JumpHere3
-A=M
-D;JGT
-
-@SP
-A=M
-M=0
-
-(JumpHere3)
-@SP
-A=M
-M=-1
+M=M+1
 '''
 
 ADD_SUB_AND_OR_TEMPLATE = '''
@@ -209,6 +170,7 @@ M=M{}D
 
 NOT_NEG_TEMPLATE = '''
 @SP
+A=M-1
 M={}M
 '''
 
@@ -221,9 +183,9 @@ class VMParser:
     jump_table = {}
     dest_table = {}
     compute_table = {
-        'eq': EQ_TEMPLATE,
-        'lt': LT_TEMPLATE,
-        'gt': GT_TEMPLATE,
+        'eq': EQ_LT_GT_TEMPLATE.format(command='JEQ'),
+        'lt': EQ_LT_GT_TEMPLATE.format(command='JGT'),
+        'gt': EQ_LT_GT_TEMPLATE.format(command='JLT'),
         'add': ADD_SUB_AND_OR_TEMPLATE.format('+'),
         'sub': ADD_SUB_AND_OR_TEMPLATE.format('-'),
         'and': ADD_SUB_AND_OR_TEMPLATE.format('&'),
@@ -249,7 +211,7 @@ class VMParser:
     }
 
     @classmethod
-    def parse(cls, line: str) -> Optional[str]:
+    def parse(cls, line: str, counter: int) -> Optional[str]:
         line = line.strip()
         if not line or line.startswith('//'):
             return
@@ -258,7 +220,11 @@ class VMParser:
         if line_words not in (1, 3):
             raise ValueError(f'wrong line format {line}')
         elif len(parts) == 1:
-            return cls.compute_table[parts[0]]
+            cmd = parts[0]
+            template = cls.compute_table[cmd]
+            if cmd in ('eq', 'gt', 'lt'):
+                return template.format(counter=counter)
+            return template
         else:
             stack_operation, segment, index = parts
             return cls.get_template_for_segment(segment=segment, stack_operation=stack_operation, index=index)

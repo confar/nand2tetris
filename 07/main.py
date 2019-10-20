@@ -14,8 +14,8 @@ if __name__ == '__main__':
     if not os.path.exists(infile):
         raise FileNotFoundError(f'file {infile} was not found in the current directory')
     with open(infile) as to_read,  open(args.outfile, 'w') as to_write:
-        for line in to_read:
-            hack_code = VMParser.parse(line)
+        for counter, line in enumerate(to_read):
+            hack_code = VMParser.parse(line, counter)
             if hack_code:
                 # write comment first
                 to_write.write(f'// {line}')
