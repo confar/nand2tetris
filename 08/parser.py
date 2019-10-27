@@ -1,4 +1,8 @@
+import re
+from functools import partial
 from typing import Optional
+
+strip_comments = partial(re.sub, r'\/\/.+', '')
 
 CONSTANT_TEMPLATE = '''
 @{index}
@@ -165,13 +169,30 @@ D=M
 
 @SP
 A=M-1
-M=M{}D
+M=M{operation}D
 '''
 
 NOT_NEG_TEMPLATE = '''
 @SP
 A=M-1
-M={}M
+M={operation}M
+'''
+
+
+LABEL_TEMPLATE = '({label})'
+
+GOTO_LABEL_TEMPLATE = '''
+@{label}
+0;JMP
+'''
+
+IF_GOTO_LABEL_TEMPLATE = '''
+@SP
+AM=M-1
+D=M
+
+@{label}
+D;JNE
 '''
 
 
@@ -180,18 +201,37 @@ class ValidationError(Exception):
 
 
 class VMParser:
+    INIT_CODE = '''
+    @256
+    D=A
+    @SP
+    M=D
+    @sys.init
+    0;JMP
+    
+    (sys.init)
+    @0
+    D=A
+    @R13
+    M=D
+    '''
     jump_table = {}
     dest_table = {}
+    label_table = {
+        'label': LABEL_TEMPLATE,
+        'goto': GOTO_LABEL_TEMPLATE,
+        'if-goto': IF_GOTO_LABEL_TEMPLATE,
+    }
     compute_table = {
         'eq': EQ_LT_GT_TEMPLATE.format(command='JEQ'),
         'lt': EQ_LT_GT_TEMPLATE.format(command='JGT'),
         'gt': EQ_LT_GT_TEMPLATE.format(command='JLT'),
-        'add': ADD_SUB_AND_OR_TEMPLATE.format('+'),
-        'sub': ADD_SUB_AND_OR_TEMPLATE.format('-'),
-        'and': ADD_SUB_AND_OR_TEMPLATE.format('&'),
-        'or': ADD_SUB_AND_OR_TEMPLATE.format('|'),
-        'neg': NOT_NEG_TEMPLATE.format('-'),
-        'not': NOT_NEG_TEMPLATE.format('!'),
+        'add': ADD_SUB_AND_OR_TEMPLATE.format(operation='+'),
+        'sub': ADD_SUB_AND_OR_TEMPLATE.format(operation='-'),
+        'and': ADD_SUB_AND_OR_TEMPLATE.format(operation='&'),
+        'or': ADD_SUB_AND_OR_TEMPLATE.format(operation='|'),
+        'neg': NOT_NEG_TEMPLATE.format(operation='-'),
+        'not': NOT_NEG_TEMPLATE.format(operation='!'),
     }
     segment_mapping = {
         'local': 'LCL',
@@ -212,12 +252,12 @@ class VMParser:
 
     @classmethod
     def parse(cls, line: str, counter: int) -> Optional[str]:
-        line = line.strip()
+        line = strip_comments(line).strip()
         if not line or line.startswith('//'):
             return
         parts = line.split()
         line_words = len(parts)
-        if line_words not in (1, 3):
+        if line_words not in (1, 2, 3):
             raise ValueError(f'wrong line format {line}')
         elif len(parts) == 1:
             cmd = parts[0]
@@ -225,6 +265,10 @@ class VMParser:
             if cmd in ('eq', 'gt', 'lt'):
                 return template.format(counter=counter)
             return template
+        elif len(parts) == 2:
+            cmd, label_name = parts
+            template = cls.label_table[cmd]
+            return template.format(label=label_name)
         else:
             stack_operation, segment, index = parts
             return cls.get_template_for_segment(segment=segment, stack_operation=stack_operation, index=index)
