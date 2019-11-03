@@ -21,5 +21,3 @@ if __name__ == '__main__':
                 # write comment first
                 to_write.write(f'// {line}')
                 to_write.write(f'{hack_code}\n')
-
-
