@@ -196,6 +196,86 @@ D;JNE
 '''
 
 
+RETURN_TEMPLATE = '''
+@LCL
+D=M
+
+@R13
+M=D
+
+@5
+D=A
+
+@R13
+A=M-D
+D=M
+
+@R14
+M=D
+
+@SP
+AM=M-1
+D=M
+
+@ARG
+M=D
+
+@SP
+M=M+1
+A=M-1
+M=D
+
+@R13
+A=M-1
+D=M
+
+@THAT
+M=D
+
+@2
+D=A
+
+@R13
+A=M-D
+D=M
+
+@THIS
+M=D
+
+@3
+D=A
+
+@R13
+A=M-D
+D=M
+
+@ARG
+M=D
+
+@4
+D=A
+
+@R13
+A=M-D
+D=M
+
+@LCL
+M=D
+
+@R14
+0;JMP
+'''
+
+INIT_LOCAL_TEMPLATE = '''
+@{local_var_index}
+D=A
+
+@LCL
+A=M+D
+M=0
+'''
+
+
 class ValidationError(Exception):
     pass
 
@@ -232,6 +312,7 @@ class VMParser:
         'or': ADD_SUB_AND_OR_TEMPLATE.format(operation='|'),
         'neg': NOT_NEG_TEMPLATE.format(operation='-'),
         'not': NOT_NEG_TEMPLATE.format(operation='!'),
+        'return': RETURN_TEMPLATE,
     }
     segment_mapping = {
         'local': 'LCL',
@@ -270,8 +351,18 @@ class VMParser:
             template = cls.label_table[cmd]
             return template.format(label=label_name)
         else:
-            stack_operation, segment, index = parts
-            return cls.get_template_for_segment(segment=segment, stack_operation=stack_operation, index=index)
+            if parts[0] == 'function':
+                template = ''
+                _, fn_name, local_vars_num = parts
+                for i in range(int(local_vars_num)):
+                    template = '\n'.join([template, INIT_LOCAL_TEMPLATE.format(local_var_index=i)])
+                return '\n'.join([template, LABEL_TEMPLATE.format(label=fn_name)])
+            elif parts[0] == 'call':
+                _, function, args_num = parts
+                pass
+            else:
+                stack_operation, segment, index = parts
+                return cls.get_template_for_segment(segment=segment, stack_operation=stack_operation, index=index)
 
     @classmethod
     def get_template_for_segment(cls, segment, index, stack_operation):
