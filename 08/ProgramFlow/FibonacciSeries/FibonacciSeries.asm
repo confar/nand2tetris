@@ -1,3 +1,16 @@
+
+@256
+D=A
+@SP
+M=D
+@sys.init
+0;JMP
+
+(sys.init)
+@0
+D=A
+@R13
+M=D
 // push argument 1
 
 @1
@@ -185,7 +198,7 @@ AM=M-1
 D=M
 
 @COMPUTE_ELEMENT
-D;JGT
+D;JNE
 
 // goto END_PROGRAM        // otherwise, goto END_PROGRAM
 

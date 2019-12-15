@@ -2,6 +2,7 @@ import argparse
 import os
 
 from parser import VMParser
+from parser import INIT_CODE
 
 
 if __name__ == '__main__':
@@ -14,7 +15,7 @@ if __name__ == '__main__':
     if not os.path.exists(infile):
         raise FileNotFoundError(f'file {infile} was not found in the current directory')
     with open(infile) as to_read,  open(args.outfile, 'w') as to_write:
-        to_write.write(VMParser.INIT_CODE)
+        # to_write.write(INIT_CODE)
         for counter, line in enumerate(to_read):
             hack_code = VMParser.parse(line, counter)
             if hack_code:

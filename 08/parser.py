@@ -197,12 +197,14 @@ D;JNE
 
 
 RETURN_TEMPLATE = '''
+// FRAME = LCL
 @LCL
 D=M
 
 @R13
 M=D
 
+// RET = *FRAME - 5
 @5
 D=A
 
@@ -213,17 +215,21 @@ D=M
 @R14
 M=D
 
+// *ARG = pop()
 @SP
 AM=M-1
 D=M
 
 @ARG
+A=M
 M=D
 
+// SP = ARG + 1
+@ARG
+D=M
+
 @SP
-M=M+1
-A=M-1
-M=D
+M=D+1
 
 @R13
 A=M-1
@@ -263,10 +269,36 @@ D=M
 M=D
 
 @R14
+A=M
 0;JMP
 '''
 
+CALL_TEMPLATE = '''
+// ARG = SP - n - 5
+
+@{sum}
+D=A
+
+@SP
+M=M-D
+D=M
+
+@ARG
+M=D
+
+// LCL = SP
+
+@SP
+D=M
+
+@LCL
+M=D
+'''
+
 INIT_LOCAL_TEMPLATE = '''
+@SP
+M=M+1
+
 @{local_var_index}
 D=A
 
@@ -275,26 +307,27 @@ A=M+D
 M=0
 '''
 
+INIT_CODE = '''
+@256
+D=A
+@SP
+M=D
+@sys.init
+0;JMP
+
+(sys.init)
+@0
+D=A
+@R13
+M=D
+'''
+
 
 class ValidationError(Exception):
     pass
 
 
 class VMParser:
-    INIT_CODE = '''
-    @256
-    D=A
-    @SP
-    M=D
-    @sys.init
-    0;JMP
-    
-    (sys.init)
-    @0
-    D=A
-    @R13
-    M=D
-    '''
     jump_table = {}
     dest_table = {}
     label_table = {
@@ -358,8 +391,17 @@ class VMParser:
                     template = '\n'.join([template, INIT_LOCAL_TEMPLATE.format(local_var_index=i)])
                 return '\n'.join([template, LABEL_TEMPLATE.format(label=fn_name)])
             elif parts[0] == 'call':
-                _, function, args_num = parts
                 pass
+                _, fn_name, args_num = parts
+                template = CONSTANT_TEMPLATE.format(index=counter)
+                for segment in cls.segment_mapping.values():
+                    template = '\n'.join([template,
+                                          LCL_ARG_THIS_THAT_TEMPLATE_PUSH.format(index=0,
+                                                                                 segment=segment)])
+                return '\n'.join([template,
+                                  CALL_TEMPLATE.format(sum=(int(args_num) + 5)),
+                                  GOTO_LABEL_TEMPLATE.format(label=fn_name),
+                                  LABEL_TEMPLATE.format(label=f'RoutVALUE{counter}')])
             else:
                 stack_operation, segment, index = parts
                 return cls.get_template_for_segment(segment=segment, stack_operation=stack_operation, index=index)

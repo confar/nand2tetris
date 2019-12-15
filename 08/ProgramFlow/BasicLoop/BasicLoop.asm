@@ -1,3 +1,16 @@
+
+@256
+D=A
+@SP
+M=D
+@sys.init
+0;JMP
+
+(sys.init)
+@0
+D=A
+@R13
+M=D
 // push constant 0    
 
 @0
@@ -195,7 +208,7 @@ AM=M-1
 D=M
 
 @LOOP_START
-D;JGT
+D;JNE
 
 // push local 0
 
